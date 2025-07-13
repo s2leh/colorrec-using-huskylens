@@ -1,40 +1,30 @@
-#include <Servo.h>
+#include "HUSKYLENS.h"
+#include "SoftwareSerial.h"
 
-Servo servo9;
-Servo servo8;
-Servo servo7;
-Servo servo6;
+HUSKYLENS huskylens;
+SoftwareSerial mySerial(10, 11); // TX, RX
 
 void setup() {
-  servo9.attach(9);
-  servo8.attach(8);
-  servo7.attach(7);
-  servo6.attach(6);
-
-  // Sweep for approximately 2 seconds
-  for (int pos = 0; pos <= 180; pos += 1) {
-    servo9.write(pos);
-    servo8.write(pos);
-    servo7.write(pos);
-    servo6.write(pos);
-    delay(4);  
-  }
-
-  for (int pos = 180; pos >= 0; pos -= 1) {
-    servo9.write(pos);
-    servo8.write(pos);
-    servo7.write(pos);
-    servo6.write(pos);
-    delay(4);  
-  }
-
-  // Move to and hold at 90 degrees
-  servo9.write(90);
-  servo8.write(90);
-  servo7.write(90);
-  servo6.write(90);
+  Serial.begin(9600);
+  mySerial.begin(9600);
+  huskylens.begin(mySerial);
 }
 
 void loop() {
-  // Do nothing; hold position at 90°
+  if (huskylens.request()) {
+    HUSKYLENSResult result = huskylens.read();
+
+    if (result.ID != 0) {
+      Serial.print("Detected Color: ");
+
+      switch (result.ID) {
+        case 1: Serial.println("yellow"); break;
+        case 2: Serial.println("Green"); break;
+        case 3: Serial.println("Blue"); break;
+        default: Serial.println("Unknown"); break;
+      }
+    }
+  }
+
+  delay(500);
 }
